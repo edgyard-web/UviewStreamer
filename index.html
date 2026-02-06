@@ -11,13 +11,13 @@
         .header { padding: 15px; display: flex; justify-content: space-between; background: #000; border-bottom: 1px solid #222; font-weight: bold; }
         .page { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; box-sizing: border-box; padding-bottom: 100px; }
         .active-page { display: flex; }
-        .video-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 2px solid #333; position: relative; }
+        .video-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; border: 2px solid #333; position: relative; box-shadow: 0 0 15px rgba(127, 0, 255, 0.3); }
         iframe { width: 100%; height: 100%; border: none; }
-        .btn { background: var(--primary); border: none; color: white; padding: 18px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 16px; margin-top: 15px; text-transform: uppercase; }
-        .btn:disabled { background: #333; opacity: 0.5; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #111; color: white; box-sizing: border-box; }
+        .btn { background: var(--primary); border: none; color: white; padding: 18px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 16px; margin-top: 15px; text-transform: uppercase; cursor: pointer; }
+        .btn:disabled { background: #333; opacity: 0.5; cursor: not-allowed; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #111; color: white; box-sizing: border-box; font-size: 16px; }
         .nav { background: #000; display: flex; position: fixed; bottom: 0; width: 100%; padding: 15px 0 25px; border-top: 1px solid #222; }
-        .nav-item { flex: 1; text-align: center; font-size: 10px; color: #555; font-weight: bold; }
+        .nav-item { flex: 1; text-align: center; font-size: 10px; color: #555; font-weight: bold; cursor: pointer; }
         .nav-item.active { color: var(--accent); }
         .card { background: var(--panel); padding: 15px; border-radius: 15px; margin-bottom: 10px; text-align: left; border: 1px solid #222; }
     </style>
@@ -33,26 +33,26 @@
     <div class="video-box" id="p-root">
         <div id="v-render"></div>
         <div id="cover" style="height:100%; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="play()">
-            <div style="background:var(--primary); padding:15px 30px; border-radius:30px; font-weight:bold;">▶ СМОТРЕТЬ</div>
+            <div style="background:var(--primary); padding:15px 30px; border-radius:30px; font-weight:bold; box-shadow: 0 4px 15px rgba(127,0,255,0.5);">▶ СМОТРЕТЬ</div>
         </div>
     </div>
     <div id="t-box" style="display:none; font-size:30px; margin-top:20px; color:var(--accent); font-weight:bold;"><span id="sec">180</span> СЕК.</div>
     <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn" style="background:#222" onclick="navVid(-1)">⬅</button>
-        <button class="btn" style="background:#222" onclick="navVid(1)">➡</button>
+        <button class="btn" style="background:#222; padding: 12px;" onclick="navVid(-1)">⬅ НАЗАД</button>
+        <button class="btn" style="background:#222; padding: 12px;" onclick="navVid(1)">ВПЕРЕД ➡</button>
     </div>
 </div>
 
 <div id="u" class="page">
-    <h3>ЗАГРУЗИТЬ ВИДЕО</h3>
-    <input type="text" id="url" placeholder="Ссылка на YouTube" oninput="val()">
-    <input type="number" id="cnt" value="10" oninput="val()">
-    <p>Цена: <span id="prc">3000</span> 💰</p>
+    <h3 style="color:var(--accent)">🚀 ПРОДВИЖЕНИЕ</h3>
+    <input type="text" id="url" placeholder="Вставьте ссылку на YouTube" oninput="val()">
+    <input type="number" id="cnt" value="10" placeholder="Количество просмотров" oninput="val()">
+    <p style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px;">Итого: <span id="prc" style="color:var(--accent); font-weight:bold;">3000</span> 💰</p>
     <button id="up-btn" class="btn" onclick="addV()" disabled>ОПУБЛИКОВАТЬ</button>
 </div>
 
 <div id="o" class="page">
-    <h3>МОИ ЗАКАЗЫ</h3>
+    <h3 style="color:var(--accent)">📊 МОИ ЗАКАЗЫ</h3>
     <div id="o-list">Загрузка...</div>
 </div>
 
@@ -62,7 +62,6 @@
     <div class="nav-item" onclick="tab('o',this);loadO()">ЗАКАЗЫ</div>
 </div>
 
-<script>
 <script>
     const S_URL = "https://ikvihkyvulxhgeffyeyb.supabase.co";
     const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlrdmloa3l2dWx4aGdlZmZ5ZXliIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDAyNDY3OSwiZXhwIjoyMDg1NjAwNjc5fQ.i28yTAOU3x3MEOBOWGJCum9oH6dYuQ0g0Gz9TbCf2Gw";
@@ -83,15 +82,22 @@
 
     function showV() {
         const r = document.getElementById('v-render');
-        if (vids.length > 0) { r.innerHTML = ""; document.getElementById('cover').style.display = 'flex'; }
-        else { r.innerHTML = "Видео нет"; document.getElementById('cover').style.display = 'none'; }
+        if (vids.length > 0) { 
+            r.innerHTML = ""; 
+            document.getElementById('cover').style.display = 'flex'; 
+            document.getElementById('t-box').style.display = 'none';
+        } else { 
+            r.innerHTML = "<div style='padding:40px; color:#555;'>В ленте пока нет видео</div>"; 
+            document.getElementById('cover').style.display = 'none'; 
+        }
     }
 
     // ТА САМАЯ ФУНКЦИЯ С АВТОПЕРЕХОДОМ
     function play() {
         if (!vids[cur]) return;
         
-        document.getElementById('v-render').innerHTML = `<iframe src="https://www.youtube.com/embed/${vids[cur].youtube_id}?autoplay=1&rel=0&playsinline=1" allow="autoplay"></iframe>`;
+        // Вставляем iframe
+        document.getElementById('v-render').innerHTML = `<iframe src="https://www.youtube.com/embed/${vids[cur].youtube_id}?autoplay=1&rel=0&mute=0&playsinline=1" allow="autoplay; encrypted-media"></iframe>`;
         document.getElementById('cover').style.display = 'none';
         document.getElementById('t-box').style.display = 'block';
         
@@ -107,26 +113,26 @@
             if (s <= 0) {
                 clearInterval(window.activeInterval);
                 
-                // Начисляем монеты
+                // 1. Начисляем монеты на экране
                 bal += 150;
-                document.getElementById('coins').innerText = bal; 
+                document.getElementById('coins').innerText = bal;
                 
-                // Сохраняем в базу
+                // 2. Обновляем в Supabase (в фоне)
                 sb.from('profiles').update({ coins: bal }).eq('user_id', uid).then();
                 sb.from('videos').update({ views_done: (vids[cur].views_done || 0) + 1 }).eq('id', vids[cur].id).then();
 
-                // ПЕРЕХОД К СЛЕДУЮЩЕМУ
+                // 3. ПЕРЕХОД К СЛЕДУЮЩЕМУ ВИДЕО
                 if (vids.length > 1) {
-                    cur = (cur + 1) % vids.length; 
-                    // Показываем уведомление через API Telegram
+                    cur = (cur + 1) % vids.length; // Берем следующее видео
                     tg.showScanQrPopup({text: "Монеты начислены! Загружаем следующее..."}); 
+                    
                     setTimeout(() => {
                         tg.closeScanQrPopup();
-                        showV(); 
-                        play(); 
+                        showV(); // Готовим плеер
+                        play();  // Сразу запускаем
                     }, 2000);
                 } else {
-                    tg.showAlert("Вы посмотрели все доступные видео!");
+                    tg.showAlert("Вы посмотрели все видео в ленте!");
                     location.reload();
                 }
             }
@@ -142,21 +148,26 @@
 
     async function addV() {
         const u = document.getElementById('url').value;
-        const id = u.match(/[\w-]{11}/)?.[0];
+        const id = u.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/)?.[1] || u.match(/[\w-]{11}/)?.[0];
         const c = parseInt(document.getElementById('cnt').value);
         if (bal < c * 300) return tg.showAlert("Мало монет!");
+        
         await sb.from('videos').insert([{ youtube_id: id, views_needed: c, user_id: uid, views_done: 0 }]);
         await sb.from('profiles').update({ coins: bal - (c * 300) }).eq('user_id', uid);
+        tg.showAlert("Видео успешно добавлено!");
         location.reload();
     }
 
     async function loadO() {
         const l = document.getElementById('o-list'); l.innerHTML = "Загрузка...";
         let { data: d } = await sb.from('videos').select('*').eq('user_id', uid);
-        l.innerHTML = (d || []).map(v => `<div class="card"><b>ID: ${v.youtube_id}</b><br>Прогресс: ${v.views_done}/${v.views_needed} <button onclick="delV(${v.id})" style="color:red; background:none; border:none; float:right;">УДАЛИТЬ</button></div>`).join('') || "Пусто";
+        l.innerHTML = (d || []).map(v => {
+            let proc = Math.round((v.views_done / v.views_needed) * 100);
+            return `<div class="card"><b>ID: ${v.youtube_id}</b><br>Прогресс: ${v.views_done}/${v.views_needed} (${proc}%) <button onclick="delV(${v.id})" style="color:var(--red); background:none; border:none; float:right; font-weight:bold; cursor:pointer;">УДАЛИТЬ</button></div>`;
+        }).join('') || "<p style='color:#555'>Активных заказов нет</p>";
     }
 
-    async function delV(id) { if(confirm("Удалить?")) { await sb.from('videos').delete().eq('id', id); loadO(); } }
+    async function delV(id) { if(confirm("Удалить этот заказ?")) { await sb.from('videos').delete().eq('id', id); loadO(); } }
 
     function tab(p, e) {
         document.querySelectorAll('.page').forEach(x => x.classList.remove('active-page'));
@@ -168,7 +179,6 @@
     function navVid(d) { if (vids.length > 1) { cur = (cur + d + vids.length) % vids.length; showV(); } }
 
     window.onload = init;
-</script>;
 </script>
 </body>
 </html>
