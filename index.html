@@ -63,6 +63,7 @@
 </div>
 
 <script>
+<script>
     const S_URL = "https://ikvihkyvulxhgeffyeyb.supabase.co";
     const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlrdmloa3l2dWx4aGdlZmZ5ZXliIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDAyNDY3OSwiZXhwIjoyMDg1NjAwNjc5fQ.i28yTAOU3x3MEOBOWGJCum9oH6dYuQ0g0Gz9TbCf2Gw";
     const sb = supabase.createClient(S_URL, S_KEY);
@@ -86,19 +87,48 @@
         else { r.innerHTML = "Видео нет"; document.getElementById('cover').style.display = 'none'; }
     }
 
+    // ТА САМАЯ ФУНКЦИЯ С АВТОПЕРЕХОДОМ
     function play() {
         if (!vids[cur]) return;
-        document.getElementById('v-render').innerHTML = `<iframe src="https://www.youtube.com/embed/${vids[cur].youtube_id}?autoplay=1"></iframe>`;
+        
+        document.getElementById('v-render').innerHTML = `<iframe src="https://www.youtube.com/embed/${vids[cur].youtube_id}?autoplay=1&rel=0&playsinline=1" allow="autoplay"></iframe>`;
         document.getElementById('cover').style.display = 'none';
         document.getElementById('t-box').style.display = 'block';
-        let s = 180;
-        let iv = setInterval(async () => {
-            s--; document.getElementById('sec').innerText = s;
+        
+        let s = 180; 
+        document.getElementById('sec').innerText = s;
+        
+        if (window.activeInterval) clearInterval(window.activeInterval);
+
+        window.activeInterval = setInterval(async () => {
+            s--; 
+            document.getElementById('sec').innerText = s;
+            
             if (s <= 0) {
-                clearInterval(iv); bal += 150;
-                await sb.from('profiles').update({ coins: bal }).eq('user_id', uid);
-                await sb.from('videos').update({ views_done: (vids[cur].views_done || 0) + 1 }).eq('id', vids[cur].id);
-                location.reload();
+                clearInterval(window.activeInterval);
+                
+                // Начисляем монеты
+                bal += 150;
+                document.getElementById('coins').innerText = bal; 
+                
+                // Сохраняем в базу
+                sb.from('profiles').update({ coins: bal }).eq('user_id', uid).then();
+                sb.from('videos').update({ views_done: (vids[cur].views_done || 0) + 1 }).eq('id', vids[cur].id).then();
+
+                // ПЕРЕХОД К СЛЕДУЮЩЕМУ
+                if (vids.length > 1) {
+                    cur = (cur + 1) % vids.length; 
+                    // Показываем уведомление через API Telegram
+                    tg.showScanQrPopup({text: "Монеты начислены! Загружаем следующее..."}); 
+                    setTimeout(() => {
+                        tg.closeScanQrPopup();
+                        showV(); 
+                        play(); 
+                    }, 2000);
+                } else {
+                    tg.showAlert("Вы посмотрели все доступные видео!");
+                    location.reload();
+                }
             }
         }, 1000);
     }
@@ -138,6 +168,7 @@
     function navVid(d) { if (vids.length > 1) { cur = (cur + d + vids.length) % vids.length; showV(); } }
 
     window.onload = init;
+</script>;
 </script>
 </body>
 </html>
